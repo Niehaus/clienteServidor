@@ -1,15 +1,37 @@
-# file server.rb
 require 'socket'
+server = TCPServer.new 8000
 
-server = TCPServer.open(3001)  # Abre socket em escuta na porta 3001
-hostname = 'https://www.google.com.br'
-loop { # o servidor nunca morre, fica sempre executando
-  client = server.accept      # aceita conexão do cliente
-  msg_cliente = client.recvfrom( 10000 ) # recebe mensagem - 10000 bytes - do cliente
-
-  puts  "Mensagem do cliente: #{msg_cliente}" # imprime a mensagem do cliente no servidor
-  client.puts "Ola cliente eu, o servidor, recebi sua mensagem" #envia uma mensagem ao cliente
-  client.puts "Vamos conetá-lo ao "
-  #puts TCPSocket.gethostbyname(hostname)
-  client.close # fecha conexão
+PAGES = {
+  "/" => "Hi, welcome to the home page!",
+  "/about" => "About us: we are http hackers",
+  "/news" => "We haven't made much news yet with this server, but stay tuned"
 }
+
+PAGE_NOT_FOUND = "Sorry, there's nothing here."
+
+loop do
+  session = server.accept
+  request = []
+  while (line = session.gets) && (line.chomp.length > 0)
+    request << line.chomp
+  end
+  puts "finished reading"
+
+  http_method, path, protocol = request[0].split(' ') # there are three parts to the request line
+
+  if PAGES.keys.include? path
+    status = "200 OK"
+    response_body = PAGES[path]
+  else
+    status = "404 Not Found"
+    response_body = PAGE_NOT_FOUND
+  end
+
+  session.puts <<-HEREDOC
+HTTP/1.1 #{status}
+
+#{response_body}
+  HEREDOC
+
+  session.close
+end

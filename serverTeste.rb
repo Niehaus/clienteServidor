@@ -21,28 +21,26 @@ def content_type(path)
   CONTENT_TYPE_MAPPING.fetch(ext, DEFAULT_CONTENT_TYPE)
 end
 
-# This helper function parses the Request-Line and
-# generates a path to a file on the server.
-
+# pega o request e transforma num caminho p servidor a partir do web-root
 def requested_file(request_line)
   request_uri  = request_line.split(' ')[1]
   path         = URI.unescape(URI(request_uri).path)
 
   clean = []
 
-  # Split the path into components
+  # divide caminho em componentes
   parts = path.split('/')
 
   parts.each do |part|
-    # skip any empty or current directory (".") path components
+    # passa direto por qlq diretorio vazio
     next if part.empty? || part == '.'
-    # If the path component goes up one directory level (".."),
-    # remove the last clean component.
-    # Otherwise, add the component to the Array of clean components
+    # se o caminho sobe um nível de diretorio (".."),
+    # remove o ultimo compenente limpo
+    # se n vai pro array de components limposs
     part == '..' ? clean.pop : clean << part
   end
 
-  # return the web root joined to the clean path
+  # retonar raiz p novo caminho limpo
   File.join(WEB_ROOT, *clean)
 end
 
@@ -58,8 +56,7 @@ loop do
   path = requested_file(request_line)
   path = File.join(path, 'index.html') if File.directory?(path)
   puts path
-  # Make sure the file exists and is not a directory
-  # before attempting to open it.
+  # verifica se existe o arquivo e se n é diretorio
   if File.exist?(path) && !File.directory?(path)
     File.open(path, 'rb') do |file|
       STDERR.puts "200. All set!"
@@ -70,13 +67,13 @@ loop do
 
       socket.print "\r\n"
 
-      # write the contents of the file to the socket
+      # escreve o conteudo do arquivo no socket
       IO.copy_stream(file, socket)
     end
-  else
+  else #404 n existe arquivo
     message = "File not found\n"
     STDERR.puts "404. Not Found"
-    # respond with a 404 error code to indicate the file does not exist
+
     socket.print "HTTP/1.1 404 Not Found\r\n" +
                      "Content-Type: text/plain\r\n" +
                      "Content-Length: #{message.size}\r\n" +

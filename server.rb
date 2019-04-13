@@ -5,7 +5,6 @@ PAGES = {
   "/" => "index.html",
   "/about" => "about.html",
   "/news" => "news.html",
-  "/img" => "img.html",
   "/43775.jpg" => "43775.jpg",
   "/flavio.jpg" => "flavio.jpg"
 }
@@ -17,7 +16,7 @@ CONTENT_TYPE_MAPPING = {
     'jpg' => 'image/jpeg'
 }
 
-PAGE_NOT_FOUND = "Não tem nada aqui ):"
+PAGE_NOT_FOUND = "404 Page Not Found. Não tem nada aqui ):"
 
 # trata como binario os tipos n identificados
 DEFAULT_CONTENT_TYPE = 'application/octet-stream'
@@ -31,24 +30,31 @@ def content_type(path)
     return DEFAULT_CONTENT_TYPE
   end
 end
-
+  puts "Servidor \nDirname: clienteServer\nPort: 8000"
 loop do
-  session = server.accept
+  #session = server.accept
+
+  cliente = 0
   request = []
+  Thread.fork(server.accept) do |session|
   while (line = session.gets) && (line.chomp.length > 0)
     request << line.chomp
   end
+  puts "\n"
   http_method, path, protocol = request[0].split(' ') #separa a linha de requisição
-  type = content_type(path)
-  f = File.open(PAGES[path],"r")
+
   puts "Request:: #{http_method} #{path} #{protocol}"
-  puts IPSocket.getaddress("localhost")
-  
+  addres_vector = session.addr(:hostname)
+  puts "Hostname:: #{addres_vector[2]}"
+  puts "IP:: #{addres_vector[3]}"
+  puts request[3]
   if PAGES.keys.include? path
     status = "200 OK"
+    type = content_type(path)
     puts "content-type: #{type}"
-    puts "caminho = #{path}"
+    f = File.open(PAGES[path],"r")
     response_body = f.read()
+    f.close
   else
     status = "404 Not Found"
     response_body = PAGE_NOT_FOUND
@@ -61,5 +67,5 @@ HTTP/1.1 #{status}
   HEREDOC
 
   session.close
-  f.close
+  end
 end

@@ -1,6 +1,7 @@
 require 'socket'
 server = TCPServer.new 8000
 
+
 PAGES = {
   "/" => "index.html",
   "/about" => "about.html",
@@ -33,25 +34,26 @@ end
   puts "Servidor \nDirname: clienteServer\nPort: 8000"
 loop do
   #session = server.accept
-
   cliente = 0
   request = []
   Thread.fork(server.accept) do |session|
   while (line = session.gets) && (line.chomp.length > 0)
     request << line.chomp
   end
-  puts "\n"
+
   http_method, path, protocol = request[0].split(' ') #separa a linha de requisição
 
   puts "Request:: #{http_method} #{path} #{protocol}"
   addres_vector = session.addr(:hostname)
   puts "Hostname:: #{addres_vector[2]}"
   puts "IP:: #{addres_vector[3]}"
-  puts request[3]
+  #puts request[3]
+
   if PAGES.keys.include? path
     status = "200 OK"
     type = content_type(path)
-    puts "content-type: #{type}"
+    puts "Status: #{status}"
+    puts "Content-type: #{type}"
     f = File.open(PAGES[path],"r")
     response_body = f.read()
     f.close
@@ -59,7 +61,7 @@ loop do
     status = "404 Not Found"
     response_body = PAGE_NOT_FOUND
   end
-  #sputs response_body
+
   session.puts <<-HEREDOC
 HTTP/1.1 #{status}
 

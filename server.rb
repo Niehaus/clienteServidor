@@ -2,7 +2,8 @@ require 'socket'
 require_relative 'serverTratamento'
 server = TCPServer.new 8000
 
-puts "Servidor \nDirname: clienteServer\nPort: 8000"
+Dir.chdir('serverSrc')
+puts "Servidor \nDirname: serverSrc\nPort: 8000"
 loop do
   #session = server.accept
   cliente = 0
@@ -14,7 +15,7 @@ loop do
 
   http_method, path, protocol = request[0].split(' ') #separa a linha de requisição
 
-  puts "Request:: #{http_method} #{path} #{protocol}"
+  puts "\nRequest:: #{http_method} #{path} #{protocol}"
   addres_vector = session.addr(:hostname)
   puts "Hostname:: #{addres_vector[2]}"
   puts "IP:: #{addres_vector[3]}"

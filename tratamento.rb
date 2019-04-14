@@ -1,5 +1,16 @@
 require 'fileutils'
 
+ERROS = {
+'403' => 'Erro 403 Forbidden.',
+'404' => 'Erro 404 Page Not Found. Sorry ):',
+'400' => 'Erro 400 Bad Request.'
+}
+
+ACCPTS = {
+'200' => '200 OK!',
+'202' => '202 Accepted!'
+}
+
 def trataEntrada(url)
   http = "http://"
   path2 = '/'
@@ -45,7 +56,7 @@ def mostraContent(hostname)
     elsif File.exist?(arquivo)
       puts "#{arquivo} content:\n"
       f =   File.open(arquivo,"r")
-      puts f.read
+    #  puts f.read
       f.close
     end
   end
@@ -61,4 +72,14 @@ def escreveIndex(hostname,body)
   f.close
   puts "Conteúdo da solicitação foi escrito!"
   Dir.chdir("..")
+end
+
+def returnErros(statusCode)
+  method,number,word = statusCode.split(' ', 3)
+  if ERROS[number]
+    puts "#{ERROS[number]}"
+    exit!
+  elsif ACCPTS[number]
+    puts "All good. Status: #{ACCPTS[number]}"
+  end
 end

@@ -20,7 +20,8 @@ while 1
       socket.puts("GET #{uri.request_uri} HTTP/1.1\r\nHost: #{uri.host}\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent:BarbsClient/5.0 (X11; Linux x86_64)\r\nAccept: text/html\r\nAccept-Encoding: deflate\r\nAccept-Language: en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7\r\n\r\n")
       response = socket.read
       headers,body = response.split("\r\n\r\n", 2)
+      status = headers.split("\n").first
+      returnErros(status)
       escreveIndex(uri.host,body)
     end
-
 end

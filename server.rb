@@ -34,12 +34,11 @@ loop do
     response_body = PAGE_NOT_FOUND
   end
 
+  puts "conteudo:: #{response_body}"
   session.puts <<-HEREDOC
-HTTP/1.1 #{status}
-
-#{response_body}
+HTTP/1.1 #{status}\r\nHost: #{uri.host}\r\nConnection: keep-alive\r\nUpgrade-Insecure-Requests: 1\r\nUser-Agent:BarbsClient/5.0 (X11; Linux x86_64)\r\nAccept: text/html\r\nAccept-Encoding: deflate\r\nAccept-Language: en-US,en;q=0.9,pt-BR;q=0.8,pt;q=0.7\r\n\r\n#{response_body}
   HEREDOC
-
+  
   session.close
   end
 end
